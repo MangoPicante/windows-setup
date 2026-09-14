@@ -106,7 +106,66 @@ Section "Fonts"
 scoop install CascadiaCode-NF FiraCode-NF JetBrainsMono-NF
 
 # ---------------------------------------------------------------------------
-# 7. WSL (Ubuntu) — requires admin + reboot
+# 7. Dotfiles (PowerShell profile + .gitconfig)
+# ---------------------------------------------------------------------------
+Section "Dotfiles"
+
+# Absolute path to this repo, so links point at the real files even if
+# $PWD changes.
+$RepoRoot = $PSScriptRoot
+if (-not $RepoRoot) { $RepoRoot = (Get-Location).Path }
+
+function Link-Config {
+    param(
+        [Parameter(Mandatory)][string]$Source,
+        [Parameter(Mandatory)][string]$Target
+    )
+
+    if (-not (Test-Path $Source)) {
+        Write-Host "  skip: source not found: $Source" -ForegroundColor Yellow
+        return
+    }
+
+    $targetDir = Split-Path -Parent $Target
+    if (-not (Test-Path $targetDir)) {
+        New-Item -ItemType Directory -Force -Path $targetDir | Out-Null
+    }
+
+    if (Test-Path $Target) {
+        $existing = Get-Item $Target -Force
+        $isLinkToUs = ($existing.LinkType -eq 'SymbolicLink') `
+            -and ($existing.Target -contains $Source)
+        if ($isLinkToUs) {
+            Write-Host "  ok:   $Target -> $Source"
+            return
+        }
+        $backup = "$Target.bak-$(Get-Date -Format 'yyyyMMdd-HHmmss')"
+        Move-Item $Target $backup
+        Write-Host "  backup: $Target -> $backup" -ForegroundColor Yellow
+    }
+
+    try {
+        New-Item -ItemType SymbolicLink -Path $Target -Target $Source `
+            -ErrorAction Stop | Out-Null
+        Write-Host "  link: $Target -> $Source" -ForegroundColor Green
+    } catch {
+        Copy-Item $Source $Target -Force
+        Write-Host "  copy: $Target (symlink failed; enable Developer Mode for live updates)" -ForegroundColor Yellow
+    }
+}
+
+$home5   = Join-Path $env:USERPROFILE 'Documents\WindowsPowerShell\Microsoft.PowerShell_profile.ps1'
+$home7   = Join-Path $env:USERPROFILE 'Documents\PowerShell\Microsoft.PowerShell_profile.ps1'
+$profSrc = Join-Path $RepoRoot 'profile\Microsoft.PowerShell_profile.ps1'
+$gitSrc  = Join-Path $RepoRoot 'git\.gitconfig'
+$gitDst  = Join-Path $env:USERPROFILE '.gitconfig'
+
+Link-Config -Source $profSrc -Target $home5
+Link-Config -Source $profSrc -Target $home7
+Link-Config -Source $gitSrc  -Target $gitDst
+
+# ---------------------------------------------------------------------------
+# 8. WSL (Ubuntu) — requires admin + reboot
 # ---------------------------------------------------------------------------
 Section "WSL"
 $isAdmin = ([Security.Principal.WindowsPrincipal] `

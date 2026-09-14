@@ -46,6 +46,16 @@ VS Code, Windows Terminal, Docker CLI + Docker Desktop, Notepad++
 **Fonts**
 CascadiaCode Nerd Font, FiraCode Nerd Font, JetBrainsMono Nerd Font
 
+**Dotfiles**
+- `profile/Microsoft.PowerShell_profile.ps1` — linked to both the Windows
+  PowerShell 5.1 and PowerShell 7 profile paths under `Documents\`
+- `git/.gitconfig` — linked to `~/.gitconfig`
+
+Existing files at those paths are backed up as `<path>.bak-<timestamp>`
+before being replaced. Symlinks need admin or **Developer Mode** enabled
+(Settings → For developers); if creation fails, the script falls back to a
+plain copy and prints a warning.
+
 **Optional**
 WSL2 with Ubuntu (admin + reboot required)
 
