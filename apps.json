@@ -49,9 +49,6 @@
 					"PackageIdentifier" : "GIMP.GIMP"
 				},				
 				{
-					"PackageIdentifier" : "Nvidia.NVIDIAApp"
-				},
-				{
 					"PackageIdentifier" : "Brave.Brave"
 				},
 				{
@@ -88,7 +85,7 @@
 			"Packages" : 
 			[
 				{
-					"PackageIdentifier" : "9NQ7512CXL7T"
+					"PackageIdentifier" : "XP8CLZL93F5Z4P"
 				}
 			],
 			"SourceDetails" : 
