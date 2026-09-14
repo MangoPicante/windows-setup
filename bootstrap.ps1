@@ -274,11 +274,23 @@ function Set-ConfigLink {
         Write-Host "  backup: $Target -> $backup" -ForegroundColor Yellow
     }
 
+    # Try New-Item first (works in PS 7 and elevated PS 5.1). PS 5.1's
+    # New-Item does NOT honor Developer Mode, but `cmd mklink` does, so
+    # fall through to that. Only if both fail do we degrade to a copy.
+    $linked = $false
     try {
         New-Item -ItemType SymbolicLink -Path $Target -Target $Source `
             -ErrorAction Stop | Out-Null
+        $linked = $true
+    } catch { }
+    if (-not $linked) {
+        $null = cmd /c "mklink `"$Target`" `"$Source`"" 2>&1
+        if ($LASTEXITCODE -eq 0) { $linked = $true }
+        $global:LASTEXITCODE = 0
+    }
+    if ($linked) {
         Write-Host "  link: $Target -> $Source" -ForegroundColor Green
-    } catch {
+    } else {
         Copy-Item $Source $Target -Force
         Write-Host "  copy: $Target (symlink failed; enable Developer Mode for live updates)" -ForegroundColor Yellow
         $script:DotfileFallbacks += $Target
