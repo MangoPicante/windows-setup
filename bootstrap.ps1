@@ -159,9 +159,7 @@ Assert-Native 'scoop install (python)' -NonFatal
 scoop install temurin17-jdk temurin21-jdk
 Assert-Native 'scoop install (java)' -NonFatal
 
-# R — rig is r-lib's official R version manager
-scoop install rig
-Assert-Native 'scoop install rig' -NonFatal
+# R — rig (from Posit) is installed via winget from apps.json, not scoop.
 
 # ---------------------------------------------------------------------------
 # 5. Winget apps (GUI + general software) — see apps.json

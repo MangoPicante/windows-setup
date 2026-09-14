@@ -71,6 +71,9 @@
 				},
 				{
 					"PackageIdentifier" : "Notepad++.Notepad++"
+				},
+				{
+					"PackageIdentifier" : "Posit.rig"
 				}
 			],
 			"SourceDetails" : 
