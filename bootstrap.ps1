@@ -290,6 +290,17 @@ Set-ConfigLink -Source $profSrc -Target $home5
 Set-ConfigLink -Source $profSrc -Target $home7
 Set-ConfigLink -Source $gitSrc  -Target $gitDst
 
+# Windows Terminal — path has a version hash (Store vs Preview); glob it.
+# LocalState only exists after Terminal has been launched at least once.
+$termSrc = Join-Path $RepoRoot 'terminal\settings.json'
+$termLocalState = Get-ChildItem "$env:LOCALAPPDATA\Packages\Microsoft.WindowsTerminal_*\LocalState" `
+    -Directory -ErrorAction SilentlyContinue | Select-Object -First 1
+if ($termLocalState) {
+    Set-ConfigLink -Source $termSrc -Target (Join-Path $termLocalState.FullName 'settings.json')
+} else {
+    Write-Host "  skip: Windows Terminal LocalState not found (launch Terminal once, then re-run)." -ForegroundColor Yellow
+}
+
 # ---------------------------------------------------------------------------
 # 8. Claude Code — installed globally via npm on a fnm-managed Node LTS
 # ---------------------------------------------------------------------------

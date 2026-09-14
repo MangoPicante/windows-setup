@@ -1,0 +1,32 @@
+{
+    "$schema": "https://aka.ms/terminal-profiles-schema",
+    "copyFormatting": "none",
+    "copyOnSelect": true,
+    "confirmCloseAllTabs": false,
+    "theme": "dark",
+    "useAcrylicInTabRow": false,
+    "showTabsInTitlebar": true,
+    "alwaysShowTabs": true,
+    "profiles": {
+        "defaults": {
+            "font": {
+                "face": "CaskaydiaCove Nerd Font",
+                "size": 11
+            },
+            "colorScheme": "One Half Dark",
+            "cursorShape": "bar",
+            "opacity": 95,
+            "useAcrylic": false,
+            "padding": "8, 8, 8, 8",
+            "antialiasingMode": "cleartype",
+            "scrollbarState": "hidden"
+        },
+        "list": []
+    },
+    "schemes": [],
+    "actions": [
+        { "command": "find",  "keys": "ctrl+shift+f" },
+        { "command": "paste", "keys": "ctrl+v"       },
+        { "command": "copy",  "keys": "ctrl+c"       }
+    ]
+}
