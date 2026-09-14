@@ -323,6 +323,16 @@ if (Get-Command fnm -ErrorAction SilentlyContinue) {
 }
 
 # ---------------------------------------------------------------------------
+# 9. Windows tweaks (Explorer / taskbar / theme / long paths)
+# ---------------------------------------------------------------------------
+$settingsScript = Join-Path $RepoRoot 'settings.ps1'
+if (Test-Path $settingsScript) {
+    & $settingsScript
+} else {
+    Write-Host "settings.ps1 not found at $settingsScript — skipping." -ForegroundColor Yellow
+}
+
+# ---------------------------------------------------------------------------
 # Done
 # ---------------------------------------------------------------------------
 Section "Done"
