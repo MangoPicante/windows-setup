@@ -44,7 +44,6 @@ Set-RegistryValue $adv 'Start_TrackProgs'   0    # no "recent apps" in Start
 
 # --- Taskbar ---
 Set-RegistryValue $adv 'TaskbarAl'          0    # align left (Win10 style)
-Set-RegistryValue $adv 'TaskbarDa'          0    # hide Widgets button
 Set-RegistryValue $adv 'TaskbarMn'          0    # hide Chat button
 Set-RegistryValue $adv 'ShowTaskViewButton' 0    # hide Task View button
 
