@@ -5,13 +5,9 @@
 
 .DESCRIPTION
   Run this in a NON-ADMIN PowerShell. Scoop refuses to install from an
-  elevated shell, so the whole script assumes non-admin. A single UAC
-  prompt is triggered up front to enable Developer Mode (so later
-  symlink steps work without admin).
-
-  WSL setup is intentionally NOT part of this script — it needs admin
-  plus a reboot and is a one-time-per-machine step. Run it manually:
-    wsl --install -d Ubuntu   # elevated shell, reboot after
+  elevated shell, so the whole script assumes non-admin. UAC prompts
+  appear for the few steps that need admin (Developer Mode, WSL
+  install, long paths).
 
   Usage:
     Set-ExecutionPolicy -Scope CurrentUser RemoteSigned
@@ -353,6 +349,34 @@ if (Test-Path $vscodeScript) {
 }
 
 # ---------------------------------------------------------------------------
+# 8.7. WSL (Ubuntu 24.04) — one UAC bounce; first-run user setup is manual
+# ---------------------------------------------------------------------------
+Section "WSL"
+
+# `wsl --list --quiet` returns non-zero (or an error string) when WSL
+# isn't installed. A zero exit with output = at least one distro exists.
+$wslInstalled = $false
+try {
+    $null = wsl --list --quiet 2>&1
+    if ($LASTEXITCODE -eq 0) { $wslInstalled = $true }
+    $global:LASTEXITCODE = 0
+} catch { }
+
+if ($wslInstalled) {
+    Write-Host "WSL already installed; skipping."
+} else {
+    Write-Host "Installing WSL + Ubuntu-24.04 (UAC prompt incoming)..." -ForegroundColor Yellow
+    Write-Host "  Downloads a ~500MB distro image; can take a few minutes."
+    $wslCmd = 'wsl --install -d Ubuntu-24.04 --no-launch'
+    Start-Process powershell -ArgumentList '-NoProfile','-Command',$wslCmd -Verb RunAs -Wait
+    Write-Host ""
+    Write-Host "WSL install triggered." -ForegroundColor Green
+    Write-Host "  * If a reboot is requested, reboot to finish enabling Virtual Machine Platform."
+    Write-Host "  * Launch Ubuntu once to set the Linux username/password:"
+    Write-Host "      ubuntu     (or: wsl -d Ubuntu-24.04)"
+}
+
+# ---------------------------------------------------------------------------
 # 9. Windows tweaks (Explorer / taskbar / theme / long paths)
 # ---------------------------------------------------------------------------
 $settingsScript = Join-Path $RepoRoot 'settings.ps1'
@@ -385,4 +409,4 @@ Write-Host "  * uv python install 3.12        # install a Python for uv projects
 Write-Host "  * rig add release               # install current R"
 Write-Host "  * scoop reset temurin21-jdk     # pick active Java"
 Write-Host "  * claude login                  # authenticate Claude Code"
-Write-Host "  * wsl --install -d Ubuntu       # (elevated) if you want WSL — reboot after"
+Write-Host "  * ubuntu                        # launch WSL Ubuntu once to set Linux user/pass"
