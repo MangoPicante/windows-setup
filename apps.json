@@ -1,0 +1,101 @@
+{
+	"$schema" : "https://aka.ms/winget-packages.schema.2.0.json",
+	"CreationDate" : "2026-09-13T21:26:40.076-00:00",
+	"Sources" : 
+	[
+		{
+			"Packages" : 
+			[
+				{
+					"PackageIdentifier" : "Proton.ProtonMailBridge"
+				},
+				{
+					"PackageIdentifier" : "Proton.ProtonVPN"
+				},
+				{
+					"PackageIdentifier" : "VideoLAN.VLC"
+				},
+				{
+					"PackageIdentifier" : "TheDocumentFoundation.LibreOffice"
+				},
+				{
+					"PackageIdentifier" : "Google.GoogleDrive"
+				},
+				{
+					"PackageIdentifier" : "DominikReichl.KeePass"
+				},
+				{
+					"PackageIdentifier" : "Valve.Steam"
+				},
+				{
+					"PackageIdentifier" : "EpicGames.EpicGamesLauncher"
+				},
+				{
+					"PackageIdentifier" : "PrismLauncher.PrismLauncher"
+				},
+				{
+					"PackageIdentifier" : "Microsoft.Teams"
+				},
+				{
+					"PackageIdentifier" : "Mozilla.Firefox"
+				},
+				{
+					"PackageIdentifier" : "Mozilla.Thunderbird"
+				},
+				{
+					"PackageIdentifier" : "Discord.Discord"
+				},
+				{
+					"PackageIdentifier" : "GIMP.GIMP"
+				},				
+				{
+					"PackageIdentifier" : "Nvidia.NVIDIAApp"
+				},
+				{
+					"PackageIdentifier" : "Brave.Brave"
+				},
+				{
+					"PackageIdentifier" : "voidtools.Everything"
+				},
+				{
+					"PackageIdentifier" : "Microsoft.PowerToys"
+				},
+				{
+					"PackageIdentifier" : "Microsoft.VisualStudioCode"
+				},
+				{
+					"PackageIdentifier" : "Microsoft.WindowsTerminal"
+				},
+				{
+					"PackageIdentifier" : "Docker.DockerDesktop"
+				},
+				{
+					"PackageIdentifier" : "Notepad++.Notepad++"
+				}
+			],
+			"SourceDetails" : 
+			{
+				"Argument" : "https://cdn.winget.microsoft.com/cache",
+				"Identifier" : "Microsoft.Winget.Source_8wekyb3d8bbwe",
+				"Name" : "winget",
+				"Type" : "Microsoft.PreIndexed.Package"
+			}
+		},
+		{
+			"Packages" : 
+			[
+				{
+					"PackageIdentifier" : "9NQ7512CXL7T"
+				}
+			],
+			"SourceDetails" : 
+			{
+				"Argument" : "https://storeedgefd.dsx.mp.microsoft.com/v9.0",
+				"Identifier" : "StoreEdgeFD",
+				"Name" : "msstore",
+				"Type" : "Microsoft.Rest"
+			}
+		}
+	],
+	"WinGetVersion" : "1.29.290"
+}

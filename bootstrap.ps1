@@ -1,16 +1,19 @@
 <#
 .SYNOPSIS
-  Fresh-Windows dev bootstrap: Scoop + common tools + WSL.
+  Fresh-Windows dev bootstrap: Developer Mode + Scoop (CLI/dev tools) +
+  winget (GUI apps, from apps.json) + WSL + Claude Code.
 
 .DESCRIPTION
-  Run in a NON-admin PowerShell for the Scoop portion.
-  WSL install at the end re-launches itself elevated and requires a reboot.
+  Run in a NON-admin PowerShell. The script triggers a single UAC prompt
+  up front to enable Developer Mode (so later symlink steps work
+  non-admin). WSL install is skipped unless the whole script is running
+  elevated, and it requires a reboot to finish.
 
   Usage:
     Set-ExecutionPolicy -Scope CurrentUser RemoteSigned
     .\bootstrap.ps1
 
-  Re-running is safe: Scoop skips anything already installed.
+  Re-running is safe: every step skips work that is already done.
 #>
 
 $ErrorActionPreference = 'Stop'
@@ -18,6 +21,31 @@ $ErrorActionPreference = 'Stop'
 function Section($msg) {
     Write-Host ""
     Write-Host "==> $msg" -ForegroundColor Cyan
+}
+
+# Absolute path to this repo, referenced by later sections (winget import,
+# dotfile linking, etc.) even if $PWD changes.
+$RepoRoot = $PSScriptRoot
+if (-not $RepoRoot) { $RepoRoot = (Get-Location).Path }
+
+# ---------------------------------------------------------------------------
+# 0. Developer Mode (lets symlinks work non-admin later on)
+# ---------------------------------------------------------------------------
+Section "Developer Mode"
+$devKey = 'HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\AppModelUnlock'
+$devVal = (Get-ItemProperty -Path $devKey -Name AllowDevelopmentWithoutDevLicense -ErrorAction SilentlyContinue).AllowDevelopmentWithoutDevLicense
+if ($devVal -eq 1) {
+    Write-Host "Developer Mode already enabled."
+} else {
+    Write-Host "Enabling Developer Mode (UAC prompt incoming)..." -ForegroundColor Yellow
+    $devCmd = "New-ItemProperty -Path '$devKey' -Name 'AllowDevelopmentWithoutDevLicense' -Value 1 -PropertyType DWord -Force | Out-Null"
+    Start-Process powershell -ArgumentList '-NoProfile','-Command',$devCmd -Verb RunAs -Wait
+    $devVal = (Get-ItemProperty -Path $devKey -Name AllowDevelopmentWithoutDevLicense -ErrorAction SilentlyContinue).AllowDevelopmentWithoutDevLicense
+    if ($devVal -eq 1) {
+        Write-Host "Developer Mode enabled." -ForegroundColor Green
+    } else {
+        Write-Host "Developer Mode NOT enabled — symlink steps will fall back to copies." -ForegroundColor Yellow
+    }
 }
 
 # ---------------------------------------------------------------------------
@@ -87,17 +115,19 @@ scoop install temurin17-jdk temurin21-jdk
 scoop install rig
 
 # ---------------------------------------------------------------------------
-# 5. GUI apps
+# 5. Winget apps (GUI + general software) — see apps.json
 # ---------------------------------------------------------------------------
-Section "GUI apps"
-$gui = @(
-    'vscode',
-    'windows-terminal',
-    'docker',            # Docker CLI
-    'docker-desktop',    # Docker Desktop
-    'notepadplusplus'
-)
-scoop install @gui
+Section "Winget apps"
+$appsJson = Join-Path $RepoRoot 'apps.json'
+if (Get-Command winget -ErrorAction SilentlyContinue) {
+    if (Test-Path $appsJson) {
+        winget import --import-file $appsJson --accept-package-agreements --accept-source-agreements --ignore-unavailable
+    } else {
+        Write-Host "apps.json not found at $appsJson — skipping." -ForegroundColor Yellow
+    }
+} else {
+    Write-Host "winget not found. Install 'App Installer' from the Microsoft Store, then re-run." -ForegroundColor Yellow
+}
 
 # ---------------------------------------------------------------------------
 # 6. Fonts (needs admin on some systems; scoop handles the elevation prompt)
@@ -109,11 +139,6 @@ scoop install CascadiaCode-NF FiraCode-NF JetBrainsMono-NF
 # 7. Dotfiles (PowerShell profile + .gitconfig)
 # ---------------------------------------------------------------------------
 Section "Dotfiles"
-
-# Absolute path to this repo, so links point at the real files even if
-# $PWD changes.
-$RepoRoot = $PSScriptRoot
-if (-not $RepoRoot) { $RepoRoot = (Get-Location).Path }
 
 function Link-Config {
     param(
@@ -182,6 +207,29 @@ if ($isAdmin) {
 }
 
 # ---------------------------------------------------------------------------
+# 9. Claude Code — installed globally via npm on a fnm-managed Node LTS
+# ---------------------------------------------------------------------------
+Section "Claude Code"
+if (Get-Command fnm -ErrorAction SilentlyContinue) {
+    # Ensure a Node LTS is present and set as fnm's default.
+    fnm install --lts
+    fnm default lts-latest 2>$null
+
+    # Load fnm's shell env into THIS session so npm is on PATH.
+    fnm env --use-on-cd --shell powershell | Out-String | Invoke-Expression
+
+    if (Get-Command npm -ErrorAction SilentlyContinue) {
+        npm install -g "@anthropic-ai/claude-code"
+        Write-Host "Claude Code installed. Run 'claude' in any project." -ForegroundColor Green
+    } else {
+        Write-Host "npm not found after fnm setup — install manually with:" -ForegroundColor Yellow
+        Write-Host "  npm install -g @anthropic-ai/claude-code" -ForegroundColor Yellow
+    }
+} else {
+    Write-Host "fnm missing — skipping Claude Code install." -ForegroundColor Yellow
+}
+
+# ---------------------------------------------------------------------------
 # Done
 # ---------------------------------------------------------------------------
 Section "Done"
@@ -191,8 +239,8 @@ scoop list
 Write-Host ""
 Write-Host "Next steps:" -ForegroundColor Green
 Write-Host "  * Open a new terminal so PATH updates take effect."
-Write-Host "  * fnm install --lts             # install a Node LTS"
 Write-Host "  * uv python install 3.12        # install a Python for uv projects"
 Write-Host "  * rig add release               # install current R"
-Write-Host "  * scoop reset temurin21-jdk   # pick active Java"
+Write-Host "  * scoop reset temurin21-jdk     # pick active Java"
+Write-Host "  * claude login                  # authenticate Claude Code"
 Write-Host "  * Reboot if WSL was installed."
