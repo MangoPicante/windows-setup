@@ -168,6 +168,58 @@ if (Get-Command winget -ErrorAction SilentlyContinue) {
 }
 
 # ---------------------------------------------------------------------------
+# 5.5. Remove default Windows bloat (best-effort; missing packages ignored)
+# ---------------------------------------------------------------------------
+Section "Remove default bloat"
+$bloat = @(
+    # Nobody uses
+    'Microsoft.BingNews',
+    'Microsoft.BingWeather',
+    'Microsoft.BingSearch',
+    'Microsoft.MicrosoftSolitaireCollection',
+    'Microsoft.MixedReality.Portal',
+    'Microsoft.GetHelp',
+    'Microsoft.Getstarted',                 # Tips
+    'Microsoft.WindowsFeedbackHub',
+    'Microsoft.549981C3F5F10',              # Cortana
+
+    # Microsoft-pushed
+    'Microsoft.OneDrive',
+    'Microsoft.MicrosoftOfficeHub',         # M365 upsell
+    'MicrosoftTeams',                       # consumer Teams
+    'Microsoft.SkypeApp',
+    'Microsoft.Copilot',
+
+    # Superseded
+    'Microsoft.ZuneMusic',                  # replaced by Media Player
+    'Microsoft.ZuneVideo',                  # Films & TV
+    'Microsoft.XboxSpeechToTextOverlay',
+
+    # Personal preference
+    'Microsoft.WindowsMaps',
+    'Microsoft.WindowsCommunicationsApps',  # Mail & Calendar
+    'Microsoft.YourPhone',                  # Phone Link
+    'Microsoft.MicrosoftStickyNotes',
+    'Microsoft.Todos',
+    'Microsoft.WindowsCamera',
+    'MicrosoftCorporationII.MicrosoftFamily',
+    'MicrosoftCorporationII.QuickAssist'
+)
+if (Get-Command winget -ErrorAction SilentlyContinue) {
+    $removed = 0
+    foreach ($id in $bloat) {
+        # --exact + --id: require full-Id match. Redirect all streams: a
+        # not-installed package prints noise + returns non-zero, both fine.
+        winget uninstall --id $id --exact --silent --accept-source-agreements *> $null
+        if ($LASTEXITCODE -eq 0) { $removed++ }
+        $global:LASTEXITCODE = 0
+    }
+    Write-Host "Uninstalled $removed of $($bloat.Count) bloat packages (missing = ignored)." -ForegroundColor Green
+} else {
+    Write-Host "winget not found — skipping bloat removal." -ForegroundColor Yellow
+}
+
+# ---------------------------------------------------------------------------
 # 6. Fonts (nerd-fonts bucket installs per-user; no admin needed)
 # ---------------------------------------------------------------------------
 Section "Fonts"
