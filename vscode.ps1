@@ -45,13 +45,21 @@ foreach ($ext in $want) {
         $skipped++
         continue
     }
-    code --install-extension $ext --force *> $null
-    if ($LASTEXITCODE -eq 0) {
+    # `code` is Node under the hood and prints deprecation warnings to
+    # stderr. PS 5.1 wraps native stderr as NativeCommandError and throws
+    # under EAP=Stop, AND clobbers $LASTEXITCODE (usually to -1) even when
+    # the install actually succeeded. Catch it and use `--list-extensions`
+    # as the source of truth for whether the extension is now present.
+    try {
+        code --install-extension $ext --force 2>&1 | Out-Null
+    } catch { }
+    $global:LASTEXITCODE = 0
+    $have = @(code --list-extensions)
+    if ($have -contains $ext) {
         Write-Host "  add:  $ext" -ForegroundColor Green
         $installed++
     } else {
-        Write-Host "  fail: $ext (exit $LASTEXITCODE)" -ForegroundColor Yellow
-        $global:LASTEXITCODE = 0
+        Write-Host "  fail: $ext" -ForegroundColor Yellow
     }
 }
 Write-Host "$installed installed, $skipped already present." -ForegroundColor Green
