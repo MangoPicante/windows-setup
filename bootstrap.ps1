@@ -81,7 +81,18 @@ if ($devVal -eq 1) {
 Section "Scoop"
 $scoopAlreadyInstalled = [bool](Get-Command scoop -ErrorAction SilentlyContinue)
 if (-not $scoopAlreadyInstalled) {
-    Set-ExecutionPolicy -ExecutionPolicy RemoteSigned -Scope CurrentUser -Force
+    # Scoop's installer runs unsigned scripts, so the effective policy must
+    # allow that. If it already does (Bypass/Unrestricted/RemoteSigned),
+    # don't touch the setting — a LocalMachine/GPO override would make
+    # Set-ExecutionPolicy throw even when the effective policy is fine.
+    $effective = Get-ExecutionPolicy
+    if ($effective -in @('Restricted','AllSigned','Default')) {
+        try {
+            Set-ExecutionPolicy -ExecutionPolicy RemoteSigned -Scope CurrentUser -Force -ErrorAction Stop
+        } catch [System.Security.SecurityException] {
+            Write-Host "  warn: cannot set CurrentUser execution policy (overridden by LocalMachine/GPO); effective is $effective." -ForegroundColor Yellow
+        }
+    }
     Invoke-RestMethod -Uri https://get.scoop.sh | Invoke-Expression
 } else {
     Write-Host "Scoop already installed."
