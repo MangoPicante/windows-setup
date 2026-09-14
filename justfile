@@ -14,14 +14,18 @@ bootstrap:
 settings:
     ./settings.ps1
 
+# Install VS Code extensions listed in vscode/extensions.txt
+vscode:
+    ./vscode.ps1
+
 # Verify installed tools are on PATH
 verify:
     ./verify.ps1
 
 # Parse-check all PowerShell scripts (fast, no lint rules)
 parse:
-    $ok = $true; foreach ($f in 'bootstrap.ps1','settings.ps1','verify.ps1') { $errs = $null; [System.Management.Automation.Language.Parser]::ParseFile((Resolve-Path $f), [ref]$null, [ref]$errs) | Out-Null; if ($errs) { Write-Host "${f}: FAIL" -ForegroundColor Red; $errs | Format-List Message, Extent; $ok = $false } else { Write-Host "${f}: OK" -ForegroundColor Green } }; if (-not $ok) { exit 1 }
+    $ok = $true; foreach ($f in 'bootstrap.ps1','settings.ps1','verify.ps1','vscode.ps1') { $errs = $null; [System.Management.Automation.Language.Parser]::ParseFile((Resolve-Path $f), [ref]$null, [ref]$errs) | Out-Null; if ($errs) { Write-Host "${f}: FAIL" -ForegroundColor Red; $errs | Format-List Message, Extent; $ok = $false } else { Write-Host "${f}: OK" -ForegroundColor Green } }; if (-not $ok) { exit 1 }
 
 # Lint with PSScriptAnalyzer (install with: Install-Module PSScriptAnalyzer -Scope CurrentUser)
 lint:
-    Invoke-ScriptAnalyzer -Path bootstrap.ps1, settings.ps1, verify.ps1 -Severity Warning, Error
+    Invoke-ScriptAnalyzer -Path bootstrap.ps1, settings.ps1, verify.ps1, vscode.ps1 -Severity Warning, Error

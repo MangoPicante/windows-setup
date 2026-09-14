@@ -1,0 +1,21 @@
+# VS Code extensions installed by vscode.ps1.
+# One extension ID per line. Blank lines and `#` comments ignored.
+# Edit this file, then run:  just vscode
+# (or a full bootstrap re-run).
+
+# Editor & git
+editorconfig.editorconfig
+eamodio.gitlens
+github.vscode-pull-request-github
+
+# Formatting / linting
+dbaeumer.vscode-eslint
+esbenp.prettier-vscode
+
+# Languages (bootstrap installs matching runtimes)
+ms-vscode.powershell
+ms-python.python
+ms-python.vscode-pylance
+ms-toolsai.jupyter
+REditorSupport.r
+redhat.java

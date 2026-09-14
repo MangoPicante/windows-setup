@@ -334,6 +334,16 @@ if (Get-Command fnm -ErrorAction SilentlyContinue) {
 }
 
 # ---------------------------------------------------------------------------
+# 8.5. VS Code extensions (see vscode/extensions.txt)
+# ---------------------------------------------------------------------------
+$vscodeScript = Join-Path $RepoRoot 'vscode.ps1'
+if (Test-Path $vscodeScript) {
+    & $vscodeScript
+} else {
+    Write-Host "vscode.ps1 not found at $vscodeScript — skipping." -ForegroundColor Yellow
+}
+
+# ---------------------------------------------------------------------------
 # 9. Windows tweaks (Explorer / taskbar / theme / long paths)
 # ---------------------------------------------------------------------------
 $settingsScript = Join-Path $RepoRoot 'settings.ps1'
