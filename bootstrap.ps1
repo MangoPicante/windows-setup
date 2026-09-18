@@ -175,8 +175,12 @@ if (Get-Command winget -ErrorAction SilentlyContinue) {
 # ---------------------------------------------------------------------------
 # 5.5. Remove default Windows bloat (best-effort; missing packages ignored)
 # ---------------------------------------------------------------------------
+# Pre-provisioned AppX packages don't appear in winget's installed-apps DB,
+# so they must be removed via Remove-AppxPackage. Only Win32 apps (OneDrive,
+# Teams, Skype, Copilot) go through winget uninstall.
 Section "Remove default bloat"
-$bloat = @(
+
+$appxBloat = @(
     # Nobody uses
     'Microsoft.BingNews',
     'Microsoft.BingWeather',
@@ -189,11 +193,7 @@ $bloat = @(
     'Microsoft.549981C3F5F10',              # Cortana
 
     # Microsoft-pushed
-    'Microsoft.OneDrive',
     'Microsoft.MicrosoftOfficeHub',         # M365 upsell
-    'MicrosoftTeams',                       # consumer Teams
-    'Microsoft.SkypeApp',
-    'Microsoft.Copilot',
 
     # Superseded
     'Microsoft.ZuneMusic',                  # replaced by Media Player
@@ -210,19 +210,36 @@ $bloat = @(
     'MicrosoftCorporationII.MicrosoftFamily',
     'MicrosoftCorporationII.QuickAssist'
 )
+
+$win32Bloat = @(
+    'Microsoft.OneDrive',
+    'MicrosoftTeams',                       # consumer Teams
+    'Microsoft.SkypeApp',
+    'Microsoft.Copilot'
+)
+
+$removed = 0
+
+foreach ($id in $appxBloat) {
+    $pkg = Get-AppxPackage -Name $id -ErrorAction SilentlyContinue
+    if ($pkg) {
+        $pkg | Remove-AppxPackage -ErrorAction SilentlyContinue
+        if ($?) { $removed++ }
+    }
+}
+
 if (Get-Command winget -ErrorAction SilentlyContinue) {
-    $removed = 0
-    foreach ($id in $bloat) {
-        # --exact + --id: require full-Id match. Redirect all streams: a
-        # not-installed package prints noise + returns non-zero, both fine.
+    foreach ($id in $win32Bloat) {
         winget uninstall --id $id --exact --silent --accept-source-agreements *> $null
         if ($LASTEXITCODE -eq 0) { $removed++ }
         $global:LASTEXITCODE = 0
     }
-    Write-Host "Uninstalled $removed of $($bloat.Count) bloat packages (missing = ignored)." -ForegroundColor Green
 } else {
-    Write-Host "winget not found — skipping bloat removal." -ForegroundColor Yellow
+    Write-Host "  winget not found — skipping Win32 bloat removal." -ForegroundColor Yellow
 }
+
+$total = $appxBloat.Count + $win32Bloat.Count
+Write-Host "Removed $removed of $total bloat packages (missing = ignored)." -ForegroundColor Green
 
 # ---------------------------------------------------------------------------
 # 6. Fonts (nerd-fonts bucket installs per-user; no admin needed)
