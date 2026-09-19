@@ -72,6 +72,59 @@ scoop reset temurin21-jdk     # pick active Java
 claude login                  # authenticate Claude Code
 ```
 
+## Adding new tools
+
+**CLI tool from Scoop** (e.g. `sops`, `age`, `helm`, `kubectl`)
+
+1. Confirm it's available: `scoop search <name>`. Most tools live in the
+   `main` bucket; the script already adds `extras`, `java`, `nerd-fonts`,
+   and `versions` as well.
+2. Append the tool name to the `$cli` array in `bootstrap.ps1`
+   (section 3, "Core CLI utilities"). Group language runtimes or version
+   managers with section 4 instead.
+3. Re-run `.\bootstrap.ps1`. `scoop install` is a no-op for anything
+   already present, so it's safe.
+
+Worked example — adding `sops` and `age`:
+
+```powershell
+# One-off on this machine:
+scoop install sops age
+
+# So a fresh box picks them up, edit bootstrap.ps1 section 3:
+$cli = @(
+    'gh', 'ripgrep', 'fd', 'fzf', 'bat', 'jq', 'yq', '7zip',
+    'curl', 'wget', 'just', 'eza', 'delta',
+    'sops', 'age'      # secrets encryption
+)
+```
+
+If the tool is only in a bucket you don't have yet, add it to the
+`$buckets` array in section 2 first.
+
+**GUI or Store app from winget** — add the package id directly to
+`apps.json` under `Sources[0].Packages`.
+
+1. Find the id: `winget search <name>` (the "Id" column), or browse
+   [winstall.app](https://winstall.app/) / [winget.run](https://winget.run/).
+2. Add a `{ "PackageIdentifier": "<id>" }` object to the `Packages`
+   array. Order doesn't matter.
+3. Re-run `.\bootstrap.ps1` (or just `winget import --import-file apps.json
+   --accept-package-agreements --accept-source-agreements
+   --ignore-unavailable`). Already-installed apps are skipped.
+
+Example — adding Obsidian:
+
+```json
+{
+    "PackageIdentifier": "Obsidian.Obsidian"
+}
+```
+
+Regenerating with `winget export` still works if you'd rather resync
+from what's actually installed, but it will rewrite the whole file
+(and reset the `CreationDate`).
+
 ## Gotchas
 
 - Docker Desktop needs WSL2 running, so if this is a truly fresh machine
