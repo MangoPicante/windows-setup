@@ -16,7 +16,7 @@ Clone and run locally (recommended — the script needs the repo files for
 git clone https://github.com/MangoPicante/windows-setup.git
 cd windows-setup
 Set-ExecutionPolicy -Scope CurrentUser RemoteSigned
-./bootstrap.ps1
+.\bootstrap.ps1
 ```
 
 Non-admin PowerShell is fine. A single UAC prompt is triggered up front to

@@ -1,37 +1,66 @@
 {
+    "$help": "https://aka.ms/terminal-documentation",
     "$schema": "https://aka.ms/terminal-profiles-schema",
+    "actions": [],
+    "alwaysShowTabs": true,
     "copyFormatting": "none",
     "copyOnSelect": true,
-    "confirmCloseAllTabs": false,
-    "theme": {
-        "dark": "dark",
-        "light": "light"
-    },
-    "profiles": {
-        "defaults": {
-            "font": {
+    "defaultProfile": "{61c54bbd-c2c6-5271-96e7-009a87ff44bf}",
+    "keybindings": 
+    [
+        {
+            "id": "Terminal.PasteFromClipboard",
+            "keys": "ctrl+v"
+        },
+        {
+            "id": "Terminal.FindText",
+            "keys": "ctrl+shift+f"
+        },
+        {
+            "id": "Terminal.CopyToClipboard",
+            "keys": "ctrl+c"
+        }
+    ],
+    "newTabMenu": 
+    [
+        {
+            "type": "remainingProfiles"
+        }
+    ],
+    "profiles": 
+    {
+        "defaults": 
+        {
+            "antialiasingMode": "cleartype",
+            "cursorShape": "bar",
+            "font": 
+            {
                 "face": "CaskaydiaCove Nerd Font",
                 "size": 11
             },
-            "cursorShape": "bar",
             "opacity": 95,
-            "useAcrylic": false,
             "padding": "8, 8, 8, 8",
-            "antialiasingMode": "cleartype",
-            "scrollbarState": "hidden"
+            "scrollbarState": "hidden",
+            "useAcrylic": false
         },
-        "list": [
+        "list": 
+        [
             {
-                "guid": "{574e775e-4f2a-5b96-ac1e-a2962a402336}",
-                "name": "PowerShell",
-                "source": "Windows.Terminal.PowershellCore"
+                "guid": "{61c54bbd-c2c6-5271-96e7-009a87ff44bf}",
+                "hidden": false,
+                "name": "Windows PowerShell"
+            },
+            {
+                "guid": "{0caa0dad-35be-5f56-a8ff-afceeeaa6101}",
+                "hidden": false,
+                "name": "Command Prompt"
             }
         ]
     },
     "schemes": [],
-    "actions": [
-        { "command": "find",  "keys": "ctrl+shift+f" },
-        { "command": "paste", "keys": "ctrl+v"       },
-        { "command": "copy",  "keys": "ctrl+c"       }
-    ]
+    "showTabsInTitlebar": true,
+    "theme": "dark",
+    "themes": [],
+    "useAcrylicInTabRow": false,
+    "warning.confirmCloseAllTabs": false
 }
