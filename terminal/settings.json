@@ -3,10 +3,10 @@
     "copyFormatting": "none",
     "copyOnSelect": true,
     "confirmCloseAllTabs": false,
-    "theme": "dark",
-    "useAcrylicInTabRow": false,
-    "showTabsInTitlebar": true,
-    "alwaysShowTabs": true,
+    "theme": {
+        "dark": "dark",
+        "light": "light"
+    },
     "profiles": {
         "defaults": {
             "font": {
@@ -20,7 +20,13 @@
             "antialiasingMode": "cleartype",
             "scrollbarState": "hidden"
         },
-        "list": []
+        "list": [
+            {
+                "guid": "{574e775e-4f2a-5b96-ac1e-a2962a402336}",
+                "name": "PowerShell",
+                "source": "Windows.Terminal.PowershellCore"
+            }
+        ]
     },
     "schemes": [],
     "actions": [
