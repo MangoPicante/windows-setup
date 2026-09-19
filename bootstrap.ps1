@@ -127,12 +127,14 @@ $cli = @(
     'bat',           # cat with syntax highlighting
     'jq',            # JSON processor
     'yq',            # YAML processor
-    '7zip',
-    'curl',
-    'wget',
+    '7zip',          # archive tool
+    'curl',          # HTTP client
+    'wget',          # HTTP client
     'just',          # command runner (you already use a justfile)
     'eza',           # modern ls
-    'delta'          # pretty git diffs
+    'delta',         # git diff with syntax highlighting
+    'sops',          # secrets management
+    'age'            # encryption tool
 )
 scoop install @cli
 Assert-Native 'scoop install (core CLI)' -NonFatal
