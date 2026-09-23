@@ -71,6 +71,9 @@
 				},
 				{
 					"PackageIdentifier" : "Posit.rig"
+				},
+				{
+					"PackageIdentifier" : "WinDirStat.WinDirStat"
 				}
 			],
 			"SourceDetails" : 
