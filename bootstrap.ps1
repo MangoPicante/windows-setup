@@ -157,8 +157,6 @@ Assert-Native 'scoop install (python)' -NonFatal
 scoop install temurin17-jdk temurin21-jdk
 Assert-Native 'scoop install (java)' -NonFatal
 
-# R — rig (from Posit) is installed via winget from apps.json, not scoop.
-
 # ---------------------------------------------------------------------------
 # 5. Winget apps (GUI + general software) — see apps.json
 # ---------------------------------------------------------------------------
@@ -558,7 +556,6 @@ Write-Host ""
 Write-Host "Next steps:" -ForegroundColor Green
 Write-Host "  * Open a new terminal so PATH updates take effect."
 Write-Host "  * uv python install 3.12        # install a Python for uv projects"
-Write-Host "  * rig add release               # install current R"
 Write-Host "  * scoop reset temurin21-jdk     # pick active Java"
 Write-Host "  * claude login                  # authenticate Claude Code"
 Write-Host "  * ubuntu                        # launch WSL Ubuntu once to set Linux user/pass"

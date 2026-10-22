@@ -55,8 +55,14 @@ Set-RegistryValue $theme 'SystemUsesLightTheme' 0
 $search = 'HKCU:\Software\Microsoft\Windows\CurrentVersion\Search'
 Set-RegistryValue $search 'BingSearchEnabled' 0
 Set-RegistryValue $search 'CortanaConsent'    0
-Set-RegistryValue 'HKCU:\Software\Policies\Microsoft\Windows\Explorer' `
-    'DisableSearchBoxSuggestions' 1
+# HKCU\Software\Policies is often ACL-locked (GPO/MDM territory) and the
+# write can be denied even for the current user. Warn and move on.
+try {
+    Set-RegistryValue 'HKCU:\Software\Policies\Microsoft\Windows\Explorer' `
+        'DisableSearchBoxSuggestions' 1
+} catch [System.UnauthorizedAccessException] {
+    Write-Host "  warn: cannot write HKCU\Software\Policies\...\Explorer (ACL-locked); skipping DisableSearchBoxSuggestions." -ForegroundColor Yellow
+}
 
 # --- Ads / advertising id (per-user telemetry surface) ---
 Set-RegistryValue 'HKCU:\Software\Microsoft\Windows\CurrentVersion\AdvertisingInfo' `
