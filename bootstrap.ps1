@@ -251,6 +251,34 @@ scoop install CascadiaCode-NF FiraCode-NF JetBrainsMono-NF
 Assert-Native 'scoop install (fonts)' -NonFatal
 
 # ---------------------------------------------------------------------------
+# 6.5. PowerShell modules (loaded by the profile)
+# ---------------------------------------------------------------------------
+# Installed before the profile is linked so the first new shell doesn't
+# error on missing imports. CurrentUser scope — no admin required.
+Section "PowerShell modules"
+
+if ((Get-PSRepository -Name PSGallery -ErrorAction SilentlyContinue).InstallationPolicy -ne 'Trusted') {
+    Set-PSRepository -Name PSGallery -InstallationPolicy Trusted
+}
+
+# Get-InstalledModule only returns PSGallery-installed modules, so this
+# correctly ignores the old PSReadLine shipped in Windows\System32.
+$psModules = @(
+    'PSReadLine',       # predictive history, better editing
+    'Terminal-Icons',   # file-type icons in listings
+    'posh-git'          # git status in prompt
+)
+foreach ($m in $psModules) {
+    $installed = Get-InstalledModule -Name $m -ErrorAction SilentlyContinue
+    if ($installed) {
+        Write-Host "  ok:      $m ($($installed.Version))"
+    } else {
+        Install-Module -Name $m -Scope CurrentUser -Force -AllowClobber
+        Write-Host "  install: $m" -ForegroundColor Green
+    }
+}
+
+# ---------------------------------------------------------------------------
 # 7. Dotfiles (PowerShell profile + .gitconfig)
 # ---------------------------------------------------------------------------
 Section "Dotfiles"
@@ -415,6 +443,47 @@ if (Test-Path $settingsScript) {
     & $settingsScript
 } else {
     Write-Host "settings.ps1 not found at $settingsScript — skipping." -ForegroundColor Yellow
+}
+
+# ---------------------------------------------------------------------------
+# 9.5. Project directories (short path, outside OneDrive's default scope)
+# ---------------------------------------------------------------------------
+Section "Project directories"
+$projectDirs = @(
+    'code'
+)
+foreach ($rel in $projectDirs) {
+    $path = Join-Path $env:USERPROFILE $rel
+    if (Test-Path $path) {
+        Write-Host "  ok:    $path"
+    } else {
+        New-Item -ItemType Directory -Path $path -Force | Out-Null
+        Write-Host "  made:  $path" -ForegroundColor Green
+    }
+}
+
+# ---------------------------------------------------------------------------
+# 9.6. ~\bin on User PATH (drop-in scripts dir)
+# ---------------------------------------------------------------------------
+Section "User bin on PATH"
+$userBin = Join-Path $env:USERPROFILE 'bin'
+if (Test-Path $userBin) {
+    Write-Host "  ok:    $userBin"
+} else {
+    New-Item -ItemType Directory -Path $userBin -Force | Out-Null
+    Write-Host "  made:  $userBin" -ForegroundColor Green
+}
+
+# Persist on User PATH (HKCU) so new shells pick it up. Doesn't modify the
+# current session.
+$userPath  = [Environment]::GetEnvironmentVariable('Path', 'User')
+$pathParts = @(($userPath -split ';') | Where-Object { $_ })
+if ($pathParts -contains $userBin) {
+    Write-Host "  ok:    $userBin already on User PATH"
+} else {
+    $newPath = (($pathParts + $userBin) -join ';')
+    [Environment]::SetEnvironmentVariable('Path', $newPath, 'User')
+    Write-Host "  path:  added $userBin to User PATH (new shells only)" -ForegroundColor Green
 }
 
 # ---------------------------------------------------------------------------

@@ -48,6 +48,10 @@ winget export --output apps.json
 
 **Fonts** — CascadiaCode, FiraCode, JetBrainsMono (Nerd Font variants).
 
+**PowerShell modules** — `PSReadLine` (predictive history), `Terminal-Icons`,
+`posh-git`. Installed from PSGallery to `CurrentUser` scope and imported by
+the linked profile.
+
 **Dotfiles**
 - `profile/Microsoft.PowerShell_profile.ps1` — linked to both the Windows
   PowerShell 5.1 and PowerShell 7 profile paths under `Documents\`
@@ -60,6 +64,17 @@ creation is denied.
 
 **Claude Code** — installed globally via npm on the fnm-managed Node LTS.
 Run `claude login` after the script finishes.
+
+**Project directories** — creates `~\code` (short path, outside OneDrive's
+default sync scope). Edit the `$projectDirs` array in `bootstrap.ps1`
+(section 9.5) to add more.
+
+**User `bin` on PATH** — creates `~\bin` and adds it to the User PATH so
+drop-in scripts and binaries are callable from anywhere. New shells only.
+
+**Windows tweaks** (`settings.ps1`) — Explorer/taskbar/dark mode/search
+cleanup, plus `powercfg` to disable sleep on AC and (admin, one-time) long
+paths.
 
 **Optional** — WSL2 with Ubuntu (admin + reboot required).
 

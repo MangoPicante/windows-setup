@@ -68,6 +68,17 @@ if (-not (Test-Path $ctxKey)) { New-Item -Path $ctxKey -Force | Out-Null }
 # The (Default) value must exist and be empty; New-ItemProperty won't set (Default).
 Set-ItemProperty -Path $ctxKey -Name '(default)' -Value '' -Force
 
+# --- Power (dev-friendly: never sleep on AC) ---
+# Modifies the active power scheme; usually succeeds without admin on
+# consumer Windows. If it fails we warn and move on.
+powercfg /change standby-timeout-ac 0
+if ($LASTEXITCODE) {
+    Write-Host "  warn: powercfg /change standby-timeout-ac failed (exit $LASTEXITCODE)" -ForegroundColor Yellow
+    $global:LASTEXITCODE = 0
+} else {
+    Write-Host "  ok:   sleep-on-AC disabled"
+}
+
 # --- Long paths (HKLM; admin only; skip if already on) ---
 $fsKey = 'HKLM:\SYSTEM\CurrentControlSet\Control\FileSystem'
 $fsVal = (Get-ItemProperty -Path $fsKey -Name LongPathsEnabled -ErrorAction SilentlyContinue).LongPathsEnabled
