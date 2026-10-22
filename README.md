@@ -65,6 +65,14 @@ creation is denied.
 **Claude Code** — installed globally via npm on the fnm-managed Node LTS.
 Run `claude login` after the script finishes.
 
+**Claude plugins** — registers three marketplaces
+(`anthropics/claude-plugins-official`, `mattpocock/skills`,
+`JuliusBrussee/caveman`) and installs `frontend-design`, the full
+`mattpocock-skills` bundle (grill-with-docs, tdd, triage, handoff,
+diagnosing-bugs, research, improve-codebase-architecture, + ~30 more),
+and `caveman`. Edit the `$marketplaces` / `$plugins` arrays in
+`bootstrap.ps1` (section 8.3) to change the set.
+
 **Project directories** — creates `~\code` (short path, outside OneDrive's
 default sync scope). Edit the `$projectDirs` array in `bootstrap.ps1`
 (section 9.5) to add more.

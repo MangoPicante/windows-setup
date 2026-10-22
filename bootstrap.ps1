@@ -398,6 +398,58 @@ if (Get-Command fnm -ErrorAction SilentlyContinue) {
 }
 
 # ---------------------------------------------------------------------------
+# 8.3. Claude Code plugins (skills from marketplaces)
+# ---------------------------------------------------------------------------
+# Marketplaces are registered via `claude plugin marketplace add <repo>`;
+# plugins are installed as `plugin@marketplace`. `-y` accepts the shown
+# marketplace command non-interactively (required for command-source
+# plugins and when the shell is not a TTY).
+Section "Claude plugins"
+
+if (-not (Get-Command claude -ErrorAction SilentlyContinue)) {
+    Write-Host "  skip: claude not on PATH (open a new shell and re-run)" -ForegroundColor Yellow
+} else {
+    # Name = marketplace name declared in its marketplace.json.
+    # Repo = GitHub source to register from.
+    $marketplaces = @(
+        @{ Name = 'claude-plugins-official'; Repo = 'anthropics/claude-plugins-official' },
+        @{ Name = 'mattpocock';              Repo = 'mattpocock/skills' },
+        @{ Name = 'caveman';                 Repo = 'JuliusBrussee/caveman' }
+    )
+
+    # Check what's already registered so re-runs don't re-add.
+    $knownPath = Join-Path $env:USERPROFILE '.claude\plugins\known_marketplaces.json'
+    $knownNames = @()
+    if (Test-Path $knownPath) {
+        try {
+            $knownNames = (Get-Content $knownPath -Raw | ConvertFrom-Json).PSObject.Properties.Name
+        } catch { }
+    }
+
+    foreach ($m in $marketplaces) {
+        if ($knownNames -contains $m.Name) {
+            Write-Host "  ok:      marketplace $($m.Name)"
+        } else {
+            claude plugin marketplace add $m.Repo
+            Assert-Native "claude plugin marketplace add $($m.Repo)" -NonFatal
+        }
+    }
+
+    # Plugins to install (plugin@marketplace). Re-running an install for an
+    # already-installed plugin returns a non-zero exit, so Assert-Native is
+    # NonFatal here — the warning line is the signal.
+    $plugins = @(
+        'frontend-design@claude-plugins-official',
+        'mattpocock-skills@mattpocock',
+        'caveman@caveman'
+    )
+    foreach ($p in $plugins) {
+        claude plugin install $p -y --scope user
+        Assert-Native "claude plugin install $p" -NonFatal
+    }
+}
+
+# ---------------------------------------------------------------------------
 # 8.5. VS Code extensions (see vscode/extensions.txt)
 # ---------------------------------------------------------------------------
 $vscodeScript = Join-Path $RepoRoot 'vscode.ps1'
