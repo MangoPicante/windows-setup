@@ -164,6 +164,29 @@ Section "Winget apps"
 $appsJson = Join-Path $RepoRoot 'apps.json'
 if (Get-Command winget -ErrorAction SilentlyContinue) {
     if (Test-Path $appsJson) {
+        # Winget can't replace an app's files while it's running, so those
+        # packages fail during import. Discord auto-starts on login; KeePass
+        # often lingers from the last session. Ask before killing them —
+        # KeePass may hold unsaved entries, Discord may be mid-call.
+        $blockingProcs = @('KeePass', 'Discord*')
+        $running = @()
+        foreach ($p in $blockingProcs) {
+            $running += Get-Process -Name $p -ErrorAction SilentlyContinue
+        }
+        if ($running) {
+            $names = ($running.Name | Sort-Object -Unique) -join ', '
+            Write-Host "  These apps are running and will block winget install/upgrade:" -ForegroundColor Yellow
+            Write-Host "    $names"
+            Write-Host "  Close them now? Any unsaved work will be lost." -ForegroundColor Yellow
+            $answer = Read-Host "  Close [y] / skip and continue [N]"
+            if ($answer -match '^(y|yes)$') {
+                $running | Stop-Process -Force -ErrorAction SilentlyContinue
+                Write-Host "  closed: $names" -ForegroundColor Green
+            } else {
+                Write-Host "  skip:   left $names running (those packages may fail — re-run bootstrap after closing them)" -ForegroundColor Yellow
+            }
+        }
+
         winget import --import-file $appsJson --accept-package-agreements --accept-source-agreements --ignore-unavailable
     } else {
         Write-Host "apps.json not found at $appsJson — skipping." -ForegroundColor Yellow
